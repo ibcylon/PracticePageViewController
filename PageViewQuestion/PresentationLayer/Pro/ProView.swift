@@ -20,6 +20,7 @@ final class ProRootView: UIView {
   let contentView: UIView = {
     let view = UIView()
     view.backgroundColor = .white
+    
     return view
   }()
   
@@ -113,7 +114,21 @@ final class ProRootView: UIView {
   var currentPage: Int = 0 {
     didSet {
       bind(oldValue: oldValue, newValue: currentPage)
-      invalidateIntrinsicContentSize()
+      pageViewContoller.view.invalidateIntrinsicContentSize()
+      setNeedsLayout()
+      layoutIfNeeded()
+      if let scene = pageViewContoller.viewControllers?.first {
+        let height = scene.view.intrinsicContentSize.height
+        pageViewContoller.view.snp.remakeConstraints {
+          $0.top.equalTo(tabCollectionView.snp.bottom)
+          $0.leading.trailing.equalToSuperview()
+          
+          $0.bottom.equalToSuperview()
+          $0.height.equalTo(height)
+        }
+        setNeedsLayout()
+        layoutIfNeeded()
+      }
     }
   }
   
@@ -151,7 +166,6 @@ final class ProRootView: UIView {
         subscribeScene.bind(pro.subscribe)
       }
     }
-    invalidateIntrinsicContentSize()
   }
   
   override var intrinsicContentSize: CGSize {
@@ -216,7 +230,7 @@ private extension ProRootView {
     pageViewContoller.view.snp.makeConstraints {
       $0.top.equalTo(tabCollectionView.snp.bottom)
       $0.leading.trailing.equalToSuperview()
-//      $0.height.greaterThanOrEqualTo(500).priority(.low)
+      
       $0.bottom.equalToSuperview()
     }
   }
@@ -252,6 +266,13 @@ extension ProRootView: UICollectionViewDataSource, UICollectionViewDelegate, Tab
     cell.bind(title)
     cell.delegate = self
     return cell
+  }
+  
+  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    collectionView.deselectItem(at: indexPath, animated: true)
+//    invalidateIntrinsicContentSize()
+//    setNeedsLayout()
+//    layoutIfNeeded()
   }
   
 }
